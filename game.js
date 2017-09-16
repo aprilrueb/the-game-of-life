@@ -7,10 +7,10 @@ if (mainElement) {
     .addEventListener('click', game.step);
 
   document.getElementById('play_btn')
-  .addEventListener('click', game.toggle);
+  .addEventListener('click', game.togglePlaying);
 
   document.getElementById('reset_btn')
-  .addEventListener('click', game.TK);
+  .addEventListener('click', game.random);
 
   document.getElementById('clear_btn')
   .addEventListener('click', game.clear);
@@ -23,7 +23,6 @@ function Life(container, width = 12, height = 12) {
   // becomes `present` and vice versa.
   var present = new Board(width, height);
   var future = new Board(width, height);
-
   // Create a <table> to hold our cells.
   var table = createTable();
 
@@ -57,7 +56,8 @@ function Life(container, width = 12, height = 12) {
     // FIXME: This currently always toggles cell (0, 0).
     // How do we get the coordinate of the cell that was clicked on?
     // HINT: https://developer.mozilla.org/en-US/docs/Web/API/Event/target
-    var cell = document.getElementById('0-0'); // ⬅️ Fix me
+    var cell = event.target;
+     // ⬅️ Fix me
     present.toggle(cell.coord);
     paint();
   }
@@ -65,10 +65,10 @@ function Life(container, width = 12, height = 12) {
   function paint() {
     var cells = document.getElementsByTagName("td");
     for(var i=0; i<cells.length; i++){
-      cells[i].classList.remove("alive");
-      if(future[i] === 1){
+      if(present.cells[i]){
         cells[i].classList.add("alive");
       }
+      else cells[i].classList.remove("alive");
     }
 
     // TODO:
@@ -117,6 +117,7 @@ function Life(container, width = 12, height = 12) {
     // Paint the new present
     paint();
   }
+  var animation = null;
 
   function play() {
     // TODO:
@@ -124,31 +125,42 @@ function Life(container, width = 12, height = 12) {
     // automatically repeatedly every fixed time interval
     // HINT:
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval
-    return window.setInterval(step, 100);
+    animation = setInterval(step, 100);
   }
 
-  function stop(animation) {
+  function stop() {
     // TODO: Stop autoplay.
     // HINT:
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/clearInterval
-    return clearInterval(animation);
+    clearInterval(animation);
+    animation = null;
   }
 
   function togglePlaying() {
     // TODO: If we're playing, stop. Otherwise, start playing.
-    var animation;
-    if(animation) stop(animation);
 
-    else animation = play();
+    if(animation) stop();
+
+    else play();
   }
 
   function clear() {
     // TODO: Clear the board
+    for(var i = 0; i<present.cells.length;i++){
+      present.cells[i]=0;
+    }
 
+    paint();
   }
 
   function random() {
     // TODO: Randomize the board
+
+    for(var i = 0; i<present.cells.length;i++){
+      present.cells[i]=Math.round(Math.random())
+    }
+
+    paint();
   }
 
   return {play, step, stop, togglePlaying, random, clear};
