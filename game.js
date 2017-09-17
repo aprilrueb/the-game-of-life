@@ -1,4 +1,4 @@
-var mainElement = document.getElementById('main');
+/*var mainElement = document.getElementById('main');
 if (mainElement) {
   var game = Life(mainElement);
 
@@ -164,4 +164,94 @@ function Life(container, width = 12, height = 12) {
   }
 
   return {play, step, stop, togglePlaying, random, clear};
+}*/
+
+var mainElement = document.getElementById('main')
+if (mainElement) {
+  var game = Life(mainElement)
+
+  document.getElementById('step_btn')
+    .addEventListener('click', () => game.step())
+
+  document.getElementById('play_btn')
+    .addEventListener('click', game.togglePlaying)
+
+  document.getElementById('clear_btn')
+    .addEventListener('click', game.clear)
+
+  document.getElementById('reset_btn')
+    .addEventListener('click', game.random)
 }
+
+function Life(container, width=12, height=12) {
+  var present = new Board(width, height);
+  var future = new Board(width, height);
+
+  const cells = []
+  var table = createTable();
+
+  container.appendChild(table);
+
+  table.addEventListener('mousedown', toggleCellFromEvent)
+
+  function createTable() {
+    var table = document.createElement('table');
+    table.classList.add('board')
+    for (var r = 0; r < height; r++) {
+      var tr = document.createElement('tr');
+      for (var c = 0; c < width; c++) {
+        var td = document.createElement('td');
+        td.id = `${r}-${c}`
+        td.coord = [r, c];
+        tr.appendChild(td);
+        cells.push(td)
+      }
+      table.appendChild(tr);
+    }
+    return table
+  }
+
+  function toggleCellFromEvent(event) {
+    present.toggle(event.target.coord)
+    paint()
+  }
+
+  function paint() {
+    let i = cells.length; while (--i >= 0) {
+      const td = cells[i]
+      if (present.get(td.coord))
+        td.classList.add('alive')
+      else
+        td.classList.remove('alive')
+    }
+  }
+
+  function step(rules) {
+    ;[present, future] = tick(present, future, rules);
+    paint();
+  }
+
+  let interval = null
+  function play() {
+    interval = setInterval(step, 100)
+  }
+
+  function stop() {
+    clearInterval(interval)
+    interval = null
+  }
+
+  function togglePlaying() {
+    interval ? stop() : play()
+  }
+
+  function clear() {
+    step(() => 0)
+  }
+
+  function random() {
+    step(() => Math.round(Math.random()))
+  }
+
+  return {play, step, stop, togglePlaying, random, clear}
+};
